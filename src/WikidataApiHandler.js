@@ -24,7 +24,7 @@ class WikidataApiHandler {
 		try {
 			entity = await this.getEntity(entityId);
 		} catch (error) {
-			console.warn(logTag, `Entity ${entityId} not found?`);
+			console.warn(logTag, `Entity ${entityId} not found?`, error);
 			return false;
 		}
 		if (!entity.claims || typeof entity.claims[propertyId] !== 'object') {
@@ -35,7 +35,7 @@ class WikidataApiHandler {
 			const claimId = entity.claims[propertyId].id;
 			await this.removeClaim(claimId);
 		} catch (error) {
-			console.warn(logTag, `Problem removing property ${propertyId} from ${entityId}.`);
+			console.warn(logTag, `Problem removing property ${propertyId} from ${entityId}.`, error);
 			return false;
 		}
 		return true;
