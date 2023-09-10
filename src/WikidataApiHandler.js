@@ -1,11 +1,12 @@
 /* global mw */
-
+(function () {
+	
 const logTag = '[MassWdOps]';
 
 /**
  * Wikidata entity operations.
  */
-export default class WikidataApiHandler {
+class WikidataApiHandler {
 	/**
 	 * Create a new instance.
 	 */
@@ -105,5 +106,9 @@ export default class WikidataApiHandler {
 			;
 		});
 	}
-	
 }
+
+// export default WikidataApiHandler;
+window.WikidataApiHandler = WikidataApiHandler;
+
+})();
