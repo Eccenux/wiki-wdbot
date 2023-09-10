@@ -18,7 +18,7 @@
  */
 var api = new mw.Api();
 var req = api.postWithToken('csrf', {
-	action: 'wbgetentities',
+		action: 'wbgetentities',
 		ids: 'Q30049941',
 	})
 	.done(function (re) {
@@ -61,7 +61,7 @@ var claims = {
 var api = new mw.Api();
 var claimId = 'Q30049941$85F585DF-67B7-45DB-B888-A42BDB1AE872';
 var req = api.postWithToken('csrf', {
-	action: 'wbremoveclaims',
+		action: 'wbremoveclaims',
 		claim: claimId,
 	})
 	.done(function (re) {

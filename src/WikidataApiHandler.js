@@ -32,8 +32,11 @@ class WikidataApiHandler {
 			return true;
 		}
 		try {
-			const claimId = entity.claims[propertyId].id;
-			await this.removeClaim(claimId);
+			const claims = entity.claims[propertyId];
+			for (const claim of claims) {
+				const claimId = claim.id;
+				await this.removeClaim(claimId);
+			}
 		} catch (error) {
 			console.warn(logTag, `Problem removing property ${propertyId} from ${entityId}.`, error);
 			return false;

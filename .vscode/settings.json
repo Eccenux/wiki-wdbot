@@ -3,5 +3,6 @@
 		"*.lnk": true,
 		"package-lock.json": true
 	},
-	"editor.detectIndentation": false
+    "editor.detectIndentation": false,
+    "editor.useTabStops": true
 }
