@@ -1,0 +1,24 @@
+{
+  "name": "wiki-wd-mass-modyfication",
+  "version": "0.0.1",
+  "description": "Masowe modyfikacje Wikidanych, w szczególności lokalizacji (współrzędności geograficzne).",
+  "type": "module",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "wikidane",
+    "geolocation",
+    "wlm",
+    "zabytki"
+  ],
+  "author": "Maciej Nux",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "4.x",
+    "eslint": "8.x",
+    "mocha": "10.x"
+  },
+  "dependencies": {
+  }
+}

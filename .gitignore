@@ -1,0 +1,8 @@
+*.lnk
+node_modules
+output/*
+*.priv.*
+*.priv
+temp*.*
+output*.wiki
+bot.config.mjs

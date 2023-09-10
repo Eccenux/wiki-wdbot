@@ -1,0 +1,7 @@
+{
+	"search.exclude": {
+		"*.lnk": true,
+		"package-lock.json": true
+	},
+	"editor.detectIndentation": false
+}
