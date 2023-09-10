@@ -29,7 +29,7 @@ var req = api.postWithToken('csrf', {
 	})
 ;
 // Example response (fragment)
-// re.entieties.Q30049941.claims (skipped other claims)
+// re.entities.Q30049941.claims (skipped other claims)
 var claims = {
 	"P625": [{
 		"mainsnak": {

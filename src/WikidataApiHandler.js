@@ -54,7 +54,7 @@ class WikidataApiHandler {
 			ids: entityId,
 		});
 		
-		return response.entieties[entityId];
+		return response.entities[entityId];
 
 	}
 
