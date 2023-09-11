@@ -15,8 +15,31 @@ class WikidataApiHandler {
 	}
 
 	/**
+	 * Mass-remove a property.
+	 * 
+	 * @param {Array} qList List of Qs from which to remove all(!) values of propertyId.
+	 * @param {String} propertyId Property id (e.g. P625)
+	 */
+	async massRemoveProp(qList, propertyId) {
+		console.log(`Running %d removals of ${propertyId}.`, qList.length);
+		let removed = 0;
+		let skipped = [];
+		for (const entityId of qList) {
+			let ok = await this.removeProp(entityId, propertyId);
+			if (ok) {
+				console.log(`Removed from ${entityId}`);
+				removed++;
+			} else {
+				skipped.push(entityId);
+			}
+		}
+		console.log(`Done. Removed %d of %d of ${propertyId}.`, removed, qList.length);
+		console.warn(`Skipped %d:`, skipped.length, skipped);
+	}
+
+	/**
 	 * Remove property.
-	 * @param {string} entityId Q-ID of the entity to retrieve information for.
+	 * @param {string} entityId Q-ID from which to remove all(!) values of propertyId.
 	 * @param {String} propertyId Property id (e.g. P625)
 	 */
 	async removeProp(entityId, propertyId) {

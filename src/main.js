@@ -13,24 +13,17 @@ await wikidataApi.removeProp(entityId, propertyId);
 var input = document.querySelector('textarea');
 var qList = input.value
 	.replace(/[\r\n]+/g, '\n')
+	.trim()
 	.split('\n')
+	.filter(v => v.startsWith('Q'))
 	.map(v => v.replace(/^(Q[0-9]+).+/g, '$1'))
 ;
+console.log(qList.length, qList);
 
+/**
 //
 // Mass-remove a property
 var wikidataApi = new WikidataApiHandler();
 var propertyId = 'P625';
-run(qList);
-async function run(qList) {
-	console.log(`Running %d removals of ${propertyId}.`, qList.length);
-	let removed = 0;
-	for (const entityId of qList) {
-		let ok = await wikidataApi.removeProp(entityId, propertyId);
-		if (ok) {
-			console.log(`Removed from ${entityId}`);
-			removed++;
-		}
-	}
-	console.log(`Done. Removed %d of %d of ${propertyId}.`, removed, qList.length);
-}
+wikidataApi.massRemoveProp(qList, propertyId);
+/**/
