@@ -40,6 +40,33 @@ class WikidataApiHandler {
 	}
 
 	/**
+	 * Mass-remove a value of a property.
+	 * 
+	 * @param {Array} qList List of Qs from which to remove matching values of propertyId.
+	 * @param {String} propertyId Property id (e.g. P625)
+	 */
+	async massRemoveValue(qList, propertyId, valueMatcher) {
+		console.log(`Running %d removals of ${propertyId}.`, qList.length);
+		let removed = 0;	// nuymber of entities with some values removed
+		let valuesRemoved = 0;
+		let skipped = [];
+		for (const entityId of qList) {
+			let count = await this.removePropValue(entityId, propertyId, valueMatcher);
+			if (count > 0) {
+				console.log(`Removed from ${entityId}`);
+				removed++;
+				valuesRemoved += count;
+			} else {
+				skipped.push(entityId);
+			}
+		}
+		console.log(`Done. Removed at least one value from %d of %d entities (total values %d).`, removed, qList.length, valuesRemoved);
+		if (skipped.length) {
+			console.warn(`Skipped %d:`, skipped.length, skipped);
+		}
+	}
+
+	/**
 	 * Read property claims for the entity.
 	 * 
 	 * @param {String} entityId Q-ID.
