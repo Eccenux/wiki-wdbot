@@ -34,7 +34,9 @@ class WikidataApiHandler {
 			}
 		}
 		console.log(`Done. Removed %d of %d of ${propertyId}.`, removed, qList.length);
-		console.warn(`Skipped %d:`, skipped.length, skipped);
+		if (skipped.length) {
+			console.warn(`Skipped %d:`, skipped.length, skipped);
+		}
 	}
 
 	/**
