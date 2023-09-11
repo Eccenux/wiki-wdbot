@@ -74,7 +74,7 @@ class WikidataApiHandler {
 	 * 	<li>true if property was removed or was not set already.
 	 */
 	async removeProp(entityId, propertyId) {
-		const claims = this.getClaims(entityId, propertyId);
+		const claims = await this.getClaims(entityId, propertyId);
 		if (claims === false) {
 			return false;
 		}
@@ -103,7 +103,7 @@ class WikidataApiHandler {
 	 * 	<li>0..n = count of removed values (claims).
 	 */
 	async removePropValue(entityId, propertyId, valueMatcher) {
-		const claims = this.getClaims(entityId, propertyId);
+		const claims = await this.getClaims(entityId, propertyId);
 		if (claims === false) {
 			return -1;
 		}
