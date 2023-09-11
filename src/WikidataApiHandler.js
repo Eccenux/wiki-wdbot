@@ -40,11 +40,16 @@ class WikidataApiHandler {
 	}
 
 	/**
-	 * Remove property.
-	 * @param {string} entityId Q-ID from which to remove all(!) values of propertyId.
+	 * Read property claims for the entity.
+	 * 
+	 * @param {String} entityId Q-ID.
 	 * @param {String} propertyId Property id (e.g. P625)
+	 * @returns
+	 * 	<li>false if entity was not found;
+	 * 	<li>empty array if property was not;
+	 * 	<li>claims array otheriwse.
 	 */
-	async removeProp(entityId, propertyId) {
+	async getClaims(entityId, propertyId) {
 		let entity;
 		try {
 			entity = await this.getEntity(entityId);
@@ -54,10 +59,26 @@ class WikidataApiHandler {
 		}
 		if (!entity.claims || typeof entity.claims[propertyId] !== 'object') {
 			console.log(logTag, `Property ${propertyId} not found in ${entityId}.`);
-			return true;
+			return [];
+		}
+		return entity.claims[propertyId];
+	}
+
+	/**
+	 * Remove property.
+	 * 
+	 * @param {String} entityId Q-ID from which to remove all(!) values of propertyId.
+	 * @param {String} propertyId Property id (e.g. P625)
+	 * @returns
+	 * 	<li>false if entity was not found or there was a problem removing claim(s);
+	 * 	<li>true if property was removed or was not set already.
+	 */
+	async removeProp(entityId, propertyId) {
+		const claims = this.getClaims(entityId, propertyId);
+		if (claims === false) {
+			return false;
 		}
 		try {
-			const claims = entity.claims[propertyId];
 			for (const claim of claims) {
 				const claimId = claim.id;
 				await this.removeClaim(claimId);
@@ -67,6 +88,55 @@ class WikidataApiHandler {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Remove specific property value.
+	 * 
+	 * Removes value from the prop for which valueMatcher functions returns true.
+	 * 
+	 * @param {String} entityId Q-ID from which to remove all(!) values of propertyId.
+	 * @param {String} propertyId Property id (e.g. P625)
+	 * @param {Function} valueMatcher A value matcher `(value, claim) => value === 'Q123'`.
+	 * @returns
+	 * 	<li>-1 if entity was not found;
+	 * 	<li>0..n = count of removed values (claims).
+	 */
+	async removePropValue(entityId, propertyId, valueMatcher) {
+		const claims = this.getClaims(entityId, propertyId);
+		if (claims === false) {
+			return -1;
+		}
+		let removed = 0;
+		for (const claim of claims) {
+			const value = this.getClaimValue(claim);
+			if (!valueMatcher(value, claim)) {
+				continue;
+			}
+			const claimId = claim.id;
+			try {
+				await this.removeClaim(claimId);
+				removed++;
+			} catch (error) {
+				console.warn(logTag, `Problem removing claim ${claimId} from ${entityId}.`, error);
+			}
+		}
+		return removed;
+	}
+
+	/** @private */
+	getClaimValue(claim) {
+		const data = claim?.mainsnak?.datavalue;
+		if (!data) {
+			return '';
+		}
+		if (data.type === 'wikibase-entityid') {
+			return data.value.id;	// Q123
+		}
+		if ('value' in data) {
+			return data.value;	// e.g. string
+		}
+		return data;
 	}
 
 	/**

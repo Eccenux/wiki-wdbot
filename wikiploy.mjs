@@ -6,7 +6,7 @@ const ployBot = new WikiployLite(botpass);
 
 // custom summary
 ployBot.summary = () => {
-	return `v0.0.1: info when needed`;
+	return `v0.0.1: Remove specific property value`;
 }
 
 // run asynchronously to be able to wait for results
