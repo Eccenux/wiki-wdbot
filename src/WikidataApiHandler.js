@@ -1,5 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import { mwn } from "mwn";
+import { formatTime } from '../src/utils.js';
 
 const logTag = '[MassWdOps]';
 
@@ -14,6 +15,10 @@ class WikidataApiHandler {
 	 */
 	constructor(bot) {
 		this.bot = bot;
+
+		this.elapsedDebug = {
+			apiCall: false,
+		}
 	}
 
 	/**
@@ -23,6 +28,8 @@ class WikidataApiHandler {
 	 * @param {String} propertyId Property id (e.g. P625)
 	 */
 	async massRemoveProp(qList, propertyId) {
+		const startTime = performance.now();
+
 		console.log(`Running %d removals of ${propertyId}.`, qList.length);
 		let removed = 0;
 		let skipped = [];
@@ -39,6 +46,10 @@ class WikidataApiHandler {
 		if (skipped.length) {
 			console.warn(`Skipped %d:`, skipped.length, skipped);
 		}
+
+		const elapsed = formatTime(startTime, performance.now());
+		const elapsedPerRecord = formatTime(startTime, performance.now(), qList.length);
+		console.log(`Elapsed time for massRemoveValue: ${elapsed} (per Q: ${elapsedPerRecord}).`);
 	}
 
 	/**
@@ -48,6 +59,8 @@ class WikidataApiHandler {
 	 * @param {String} propertyId Property id (e.g. P625)
 	 */
 	async massRemoveValue(qList, propertyId, valueMatcher) {
+		const startTime = performance.now();
+
 		console.log(`Running %d removals of ${propertyId}.`, qList.length);
 		let removed = 0;	// nuymber of entities with some values removed
 		let valuesRemoved = 0;
@@ -66,6 +79,10 @@ class WikidataApiHandler {
 		if (skipped.length) {
 			console.warn(`Skipped %d:`, skipped.length, skipped);
 		}
+
+		const elapsed = formatTime(startTime, performance.now());
+		const elapsedPerRecord = formatTime(startTime, performance.now(), qList.length);
+		console.log(`Elapsed time for massRemoveValue: ${elapsed} (per Q: ${elapsedPerRecord}).`);
 	}
 
 	/**
@@ -175,7 +192,7 @@ class WikidataApiHandler {
 	 * @returns Entity object that should contain claims (props).
 	 */
 	async getEntity(entityId) {
-		const response = await this.apiCall({
+		const response = await this.apiCall(false, {
 			action: 'wbgetentities',
 			ids: entityId,
 		});
@@ -192,7 +209,7 @@ class WikidataApiHandler {
 	 * @returns Resolves with a server response if removed.
 	 */
 	async removeClaim(claimId) {
-		const response = await this.apiCall({
+		const response = await this.apiCall(true, {
 			action: 'wbremoveclaims',
 			claim: claimId,
 		});
@@ -200,10 +217,31 @@ class WikidataApiHandler {
 	}
 
 	/** @private */
-	apiCall(params) {
+	async apiCall(isEdit, params) {
 		const action = params.action ?? false;
+
+		const startTime = performance.now();
+		const re = await this.apiWrapper(isEdit, action, params);
+
+		if (this.elapsedDebug.apiCall) {
+			const elapsed = formatTime(startTime, performance.now());
+			console.log(`Elapsed time action:${action}: ${elapsed}.`);
+		}
+
+		return re;
+	}
+
+	/** @private */
+	apiWrapper(isEdit, action, params) {
 		return new Promise((resolve, reject) => {
-			this.bot.request(params)
+			let request;
+			if (!isEdit) {
+				request = this.bot.request(params);
+			} else {
+				const editParams = { ...params, token: this.bot.csrfToken };
+				request = this.bot.request(editParams);
+			}
+			request
 				.then((response) => {
 					// should have .success = 1
 					if (response.success) {

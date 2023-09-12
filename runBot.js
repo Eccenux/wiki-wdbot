@@ -17,7 +17,7 @@ console.log(entity);
 
 // remove props
 import qids from './temp.qids.js';
-let qList = [qids[0]];
+let qList = qids //[qids[0]];
 let propertyId = 'P1435';
 let valueMatcher = (v => v === 'Q21438156') // zabytek w Polsce
 let re = await wdBot.massRemoveValue(qList, propertyId, valueMatcher);
