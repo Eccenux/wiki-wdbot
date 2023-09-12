@@ -7,11 +7,11 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "Run wikiploy.mjs",
+			"name": "Run bot",
 			"skipFiles": [
 				"<node_internals>/**"
 			],
-			"program": "${workspaceFolder}\\wikiploy.mjs"
+			"program": "${workspaceFolder}\\runBot.js"
 		}
 	]
 }
