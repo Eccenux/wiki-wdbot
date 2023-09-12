@@ -55,6 +55,9 @@ class WikidataApiHandler {
 	/**
 	 * Mass-remove a value of a property.
 	 * 
+	 * Note! This seems to brake when executed in batches.
+	 * Probably some flood control on Wikidata.
+	 * 
 	 * @param {Array} qList List of Qs from which to remove matching values of propertyId.
 	 * @param {String} propertyId Property id (e.g. P625)
 	 */
@@ -83,6 +86,38 @@ class WikidataApiHandler {
 		const elapsed = formatTime(startTime, performance.now());
 		const elapsedPerRecord = formatTime(startTime, performance.now(), qList.length);
 		console.log(`Elapsed time for massRemoveValue: ${elapsed} (per Q: ${elapsedPerRecord}).`);
+	}
+
+	/**
+	 * Get claim ids.
+	 * 
+	 * @param {Array} qList List of Qs from which to remove matching values of propertyId.
+	 * @param {String} propertyId Property id (e.g. P625)
+	 * @param {Function} valueMatcher A value matcher `(value, claim) => value === 'Q123'`.
+	 * @returns {Array} of claim.id.
+	 */
+	async massClaimIds(qList, propertyId, valueMatcher) {
+		const startTime = performance.now();
+
+		console.log(`Running %d massClaimIds of ${propertyId}.`, qList.length);
+		let read = 0;	// number of entities with some values read
+		let valuesRead = 0;
+		let all = [];
+		for (const entityId of qList) {
+			let ids = await this.getClaimIds(entityId, propertyId, valueMatcher);
+			if (ids.length > 0) {
+				read++;
+				valuesRead += ids.length;
+				all = all.concat(ids);
+			}
+		}
+		console.log(`Done. Read at least one value from %d of %d entities (total values %d).`, read, qList.length, valuesRead);
+
+		const elapsed = formatTime(startTime, performance.now());
+		const elapsedPerRecord = formatTime(startTime, performance.now(), qList.length);
+		console.log(`Elapsed time for massClaimIds: ${elapsed} (per Q: ${elapsedPerRecord}).`);
+
+		return all;
 	}
 
 	/**
@@ -170,6 +205,52 @@ class WikidataApiHandler {
 		return removed;
 	}
 
+	/**
+	 * Remove specific claims by id.
+	 * 
+	 * @param {Array} claimIds Claims ids as read from the entity.
+	 * @returns
+	 * 	<li>-1 if entity was not found;
+	 * 	<li>0..n = count of removed values (claims).
+	 */
+	async removeClaims(claimIds) {
+		let removed = 0;
+		for (const claimId of claimIds) {
+			try {
+				await this.removeClaim(claimId);
+				removed++;
+			} catch (error) {
+				console.warn(logTag, `Problem removing claim ${claimId}.`, error);
+			}
+		}
+		return removed;
+	}
+
+	/**
+	 * Get claim ids.
+	 * 
+	 * @param {String} entityId Q-ID from which to remove all(!) values of propertyId.
+	 * @param {String} propertyId Property id (e.g. P625)
+	 * @param {Function} valueMatcher A value matcher `(value, claim) => value === 'Q123'`.
+	 * @returns {Array} of claim.id.
+	 */
+	async getClaimIds(entityId, propertyId, valueMatcher) {
+		const claims = await this.getClaims(entityId, propertyId);
+		const ids = [];
+		if (!Array.isArray(claims)) {
+			return ids;
+		}
+		for (const claim of claims) {
+			const value = this.getClaimValue(claim);
+			if (!valueMatcher(value, claim)) {
+				continue;
+			}
+			const claimId = claim.id;
+			ids.push(claimId);
+		}
+		return ids;
+	}
+	
 	/** @private */
 	getClaimValue(claim) {
 		const data = claim?.mainsnak?.datavalue;
