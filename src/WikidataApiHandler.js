@@ -1,6 +1,6 @@
-/* global mw */
-(function () {
-	
+// eslint-disable-next-line no-unused-vars
+import { mwn } from "mwn";
+
 const logTag = '[MassWdOps]';
 
 /**
@@ -9,9 +9,11 @@ const logTag = '[MassWdOps]';
 class WikidataApiHandler {
 	/**
 	 * Create a new instance.
+	 * 
+	 * @param {mwn} bot 
 	 */
-	constructor() {
-		this.api = new mw.Api();
+	constructor(bot) {
+		this.bot = bot;
 	}
 
 	/**
@@ -169,7 +171,6 @@ class WikidataApiHandler {
 	/**
 	 * Get information about a Wikidata entity.
 	 * 
-	 * @private
 	 * @param {string} entityId Q-ID of the entity to retrieve information for.
 	 * @returns Entity object that should contain claims (props).
 	 */
@@ -202,8 +203,8 @@ class WikidataApiHandler {
 	apiCall(params) {
 		const action = params.action ?? false;
 		return new Promise((resolve, reject) => {
-			this.api.postWithToken('csrf', params)
-				.done(function (response) {
+			this.bot.request(params)
+				.then((response) => {
 					// should have .success = 1
 					if (response.success) {
 						resolve(response);
@@ -217,15 +218,16 @@ class WikidataApiHandler {
 						reject(errorInfo);
 					}
 				})
-				.fail(function (re, r2) {
-					//debugger;
+				.catch((re) => {
 					const errorInfo = {
-						code: r2?.error?.code,
-						info: r2?.error?.info,
-						warn: JSON.stringify(r2?.warnings),
+						code: re?.code,
+						info: re?.info,
+						message: re?.message,
+						docref: re?.docref,
 						params: params,
 					};
 					console.error(logTag, `Request failed (${action}).`, errorInfo);
+					console.error(logTag, JSON.stringify(errorInfo, null, '\t'));
 					reject(errorInfo);
 				})
 			;
@@ -233,7 +235,4 @@ class WikidataApiHandler {
 	}
 }
 
-// export default WikidataApiHandler;
-window.WikidataApiHandler = WikidataApiHandler;
-
-})();
+export default WikidataApiHandler;
