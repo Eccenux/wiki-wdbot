@@ -6,8 +6,8 @@
 	# ✅lista Q.
 	# ✅PoC usuwania wartości z danego prop, dla których funkcja-warunek(wartość, claim) == true.
 	# ✅Masowe usuwanie.
-	# Faster? Make edits as a bot? Paralel batches?
-	# Re-try.
+	# ✅Faster? Make edits as a bot? Paralel batches?
+	# ✅Re-try batch.
 */
 SELECT item
 , inspireids
