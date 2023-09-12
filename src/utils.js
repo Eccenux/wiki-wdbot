@@ -47,7 +47,7 @@ export async function runInBatches(qList, asyncOp, name='op', maxBatches=4) {
 		chunkCount++;
 	});
 	await Promise.allSettled(promises);
-	console.log('Done all %d chunks.', chunkCount);
+	console.log('Done all %d chunks (total items: %d).', chunkCount, qList.length);
 
 	const elapsed = formatTime(startTime, performance.now());
 	const elapsedPerRecord = formatTime(startTime, performance.now(), qList.length);

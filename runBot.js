@@ -25,4 +25,4 @@ let valueMatcher = (v => v === 'Q21438156') // zabytek w Polsce
 const asyncOp = (chunk) => {
 	return wdBot.massRemoveValue(chunk, propertyId, valueMatcher);
 };
-runInBatches(qList, asyncOp, 'massRemoveValue-batches');
+runInBatches(qList, asyncOp, 'massRemoveValue-batches', 6);
