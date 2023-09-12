@@ -215,14 +215,19 @@ class WikidataBot {
 	 * 	<li>-1 if entity was not found;
 	 * 	<li>0..n = count of removed values (claims).
 	 */
-	async removeClaims(claimIds) {
+	async removeClaims(claimIds, progressStep=10) {
 		let removed = 0;
+		let count = claimIds.length;
 		for (const claimId of claimIds) {
 			try {
 				await this.removeClaim(claimId);
 				removed++;
 			} catch (error) {
 				console.warn(logTag, `Problem removing claim ${claimId}.`, error);
+			}
+			// progress
+			if (removed && removed%progressStep === 0) {
+				console.log(logTag, `Removed ${removed} of ${count}.`);
 			}
 		}
 		return removed;
@@ -317,7 +322,8 @@ class WikidataBot {
 	}
 
 	/** @private */
-	apiWrapper(isEdit, action, params) {
+	apiWrapper(isEdit, action, params, retrys=3) {
+		const retryDelay = 3000; // next try [ms]
 		return new Promise((resolve, reject) => {
 			let request;
 			if (!isEdit) {
@@ -345,12 +351,21 @@ class WikidataBot {
 					const errorInfo = {
 						code: re?.code,
 						info: re?.info,
+						params: params,
 						message: re?.message,
 						docref: re?.docref,
-						params: params,
 					};
+					if (errorInfo.code === 'failed-save') {
+						if (retrys>0) {
+							console.log('Failed save. Re-try in a bit...');
+							setTimeout(() => {
+								this.apiWrapper(isEdit, action, params, retrys-1);
+							}, retryDelay);
+							return;
+						}
+					}
 					console.error(logTag, `Request failed (${action}).`, errorInfo);
-					console.error(logTag, JSON.stringify(errorInfo, null, '\t'));
+					// console.error(logTag, JSON.stringify(errorInfo, null, '\t'));
 					reject(errorInfo);
 				})
 			;

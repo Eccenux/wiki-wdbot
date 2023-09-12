@@ -2,7 +2,7 @@
 import * as botpass from './bot.config.mjs';
 import WikiBotLite from './src/WikiBotLite.js';
 import WikidataBot from './src/WikidataBot.js';
-import { runInBatches, formatTime } from './src/utils.js';
+import * as utils from './src/utils.js';
 import fs from 'fs';
 
 const baseBot = new WikiBotLite(botpass);
@@ -21,7 +21,7 @@ const wdBot = new WikidataBot(mwnBot);
 //
 // Remove many props by value.
 // step1: prepare a list of ids of claims that should be removed
-async function removePrepare (maxBatches = 10) {
+async function removePrepare (qList, propertyId, valueMatcher = () => false, maxBatches = 15) {
 	let allIds = [];
 	const asyncOp = (chunk) => {
 		return new Promise((resolve, reject) => {
@@ -33,7 +33,7 @@ async function removePrepare (maxBatches = 10) {
 			});
 		})
 	};
-	await runInBatches(qList, asyncOp, 'claims-batches', maxBatches);
+	await utils.runInBatches(qList, asyncOp, 'claims-batches', maxBatches);
 	fs.writeFileSync('./temp.ids.js', JSON.stringify(allIds, null, '\t'));
 	console.log(`Written ${allIds.length} ids.`);
 	return allIds.length;
@@ -51,18 +51,31 @@ async function removeById () {
 	const removed = await wdBot.removeClaims(claimIds);
 	console.log(`Done. Removed: ${removed}.`);
 
-	const elapsed = formatTime(startTime, performance.now());
-	const elapsedPerRecord = formatTime(startTime, performance.now(), count);
+	const elapsed = utils.formatTime(startTime, performance.now());
+	const elapsedPerRecord = utils.formatTime(startTime, performance.now(), count);
 	console.log(`Elapsed time for massRemove: ${elapsed} (per id: ${elapsedPerRecord}).`);
 	return removed;
 }
 
-/**/
+//
+// Remove zabytek w Polsce.
+/**
 import qids from './temp.qids.js';
 let qList = qids //[qids[0]];
 let propertyId = 'P1435';
 let valueMatcher = (v => v === 'Q21438156') // zabytek w Polsce
 
-await removePrepare(15);
+await removePrepare(qList, propertyId, valueMatcher);
+await removeById();
+/**/
+
+//
+// Remove coords.
+/**/
+const qList = await utils.readQidsFile('./temp.qs.tsv');
+console.log(qList.length, qList);
+let propertyId = 'P625';
+
+await removePrepare(qList, propertyId, false);
 await removeById();
 /**/
