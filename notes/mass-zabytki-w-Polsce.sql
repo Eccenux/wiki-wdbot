@@ -4,22 +4,29 @@
 	Usuwanie powinno być niezaleźne od kolejności.
 	
 	# ✅lista Q.
-	# PoC usuwania wartości z danego prop, dla których funkcja-warunek(wartość, claim) == true.
-	# Masowe usuwanie.
+	# ✅PoC usuwania wartości z danego prop, dla których funkcja-warunek(wartość, claim) == true.
+	# ✅Masowe usuwanie.
+	# Faster? Make edits as a bot? Paralel batches?
+	# Re-try.
 */
 SELECT item
-, lat, lon
 , inspireids
 , monumentstatus
 , itemlabel
 --, typelabels, townlabel, statelabel, monumentstatus, otherthen, street
 FROM public.wlz_dupl
 where monumentstatus ~ ','
+and inspireids like 'PL.%'
 and monumentstatus in
 (
 	'zabytek nieruchomy, zabytek w Polsce',
 	'zabytek w Polsce, zabytek nieruchomy'
 )
+group by item
+, inspireids
+, monumentstatus
+, itemlabel
+order by inspireids desc
 ;
 
 /*
