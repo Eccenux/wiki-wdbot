@@ -12,9 +12,9 @@ const wdBot = new WikidataApiHandler(mwnBot);
 // console.log('purged:', re);
 
 // test get entity
-var entityId = 'Q30159570';
-var entity = await wdBot.getEntity(entityId);
-console.log(entity);
+// var entityId = 'Q30159570';
+// var entity = await wdBot.getEntity(entityId);
+// console.log(entity);
 
 // remove props
 import qids from './temp.qids.js';
@@ -25,4 +25,4 @@ let valueMatcher = (v => v === 'Q21438156') // zabytek w Polsce
 const asyncOp = (chunk) => {
 	return wdBot.massRemoveValue(chunk, propertyId, valueMatcher);
 };
-runInBatches(qList, asyncOp, 'massRemoveValue-batches', 6);
+runInBatches(qList, asyncOp, 'massRemoveValue-batches', 4);
