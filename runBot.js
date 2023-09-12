@@ -1,13 +1,13 @@
 /* eslint-disable no-unused-vars */
 import * as botpass from './bot.config.mjs';
 import WikiBotLite from './src/WikiBotLite.js';
-import WikidataApiHandler from './src/WikidataApiHandler.js';
+import WikidataBot from './src/WikidataBot.js';
 import { runInBatches, formatTime } from './src/utils.js';
 import fs from 'fs';
 
 const baseBot = new WikiBotLite(botpass);
 const mwnBot = await baseBot.getBot('www.wikidata.org');
-const wdBot = new WikidataApiHandler(mwnBot);
+const wdBot = new WikidataBot(mwnBot);
 
 // test purge
 // var re = await baseBot.purge(mwnBot, "User:Nux/test WLZ mass remove coords");
@@ -20,12 +20,6 @@ const wdBot = new WikidataApiHandler(mwnBot);
 
 //
 // Remove many props by value.
-/**/
-import qids from './temp.qids.js';
-let qList = qids //[qids[0]];
-let propertyId = 'P1435';
-let valueMatcher = (v => v === 'Q21438156') // zabytek w Polsce
-
 // step1: prepare a list of ids of claims that should be removed
 async function removePrepare (maxBatches = 10) {
 	let allIds = [];
@@ -62,6 +56,12 @@ async function removeById () {
 	console.log(`Elapsed time for massRemove: ${elapsed} (per id: ${elapsedPerRecord}).`);
 	return removed;
 }
+
+/**/
+import qids from './temp.qids.js';
+let qList = qids //[qids[0]];
+let propertyId = 'P1435';
+let valueMatcher = (v => v === 'Q21438156') // zabytek w Polsce
 
 await removePrepare(15);
 await removeById();

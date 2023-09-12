@@ -1,17 +1,17 @@
 // eslint-disable-next-line no-unused-vars
 import { mwn } from "mwn";
-import { formatTime } from '../src/utils.js';
+import { formatTime } from './utils.js';
 
 const logTag = '[MassWdOps]';
 
 /**
  * Wikidata entity operations.
  */
-class WikidataApiHandler {
+class WikidataBot {
 	/**
 	 * Create a new instance.
 	 * 
-	 * @param {mwn} bot 
+	 * @param {mwn} bot Initilized MWN bot.
 	 */
 	constructor(bot) {
 		this.bot = bot;
@@ -190,9 +190,11 @@ class WikidataApiHandler {
 		}
 		let removed = 0;
 		for (const claim of claims) {
-			const value = this.getClaimValue(claim);
-			if (!valueMatcher(value, claim)) {
-				continue;
+			if (typeof valueMatcher === 'function') {
+				const value = this.getClaimValue(claim);
+				if (!valueMatcher(value, claim)) {
+					continue;
+				}
 			}
 			const claimId = claim.id;
 			try {
@@ -241,9 +243,11 @@ class WikidataApiHandler {
 			return ids;
 		}
 		for (const claim of claims) {
-			const value = this.getClaimValue(claim);
-			if (!valueMatcher(value, claim)) {
-				continue;
+			if (typeof valueMatcher === 'function') {
+				const value = this.getClaimValue(claim);
+				if (!valueMatcher(value, claim)) {
+					continue;
+				}
 			}
 			const claimId = claim.id;
 			ids.push(claimId);
@@ -354,4 +358,4 @@ class WikidataApiHandler {
 	}
 }
 
-export default WikidataApiHandler;
+export default WikidataBot;
