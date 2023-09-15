@@ -311,7 +311,8 @@ class WikidataBot {
 		const action = params.action ?? false;
 
 		const startTime = performance.now();
-		const re = await this.apiWrapper(isEdit, action, params);
+		const asyncOp = () => this.apiWrapper(isEdit, action, params);
+		let re = await this.retry(asyncOp);
 
 		if (this.elapsedDebug.apiCall) {
 			const elapsed = formatTime(startTime, performance.now());
@@ -321,9 +322,43 @@ class WikidataBot {
 		return re;
 	}
 
+	/**
+	 * Retry async operation.
+	 * @private
+	 * 
+	 * Note! Assumes retry is possible when `asyncOp` rejects with `errorInfo.code === 'failed-save'`
+	 * 
+	 * @param {Function} asyncOp 
+	 * @param {Number} retryCount Number of tries.
+	 * @param {Number} retryDelay Next try [ms]
+	 */
+	async retry(asyncOp, retryCount=10, retryDelay=15000) {
+		let re;
+
+		let done = false;
+		do {
+			try {
+				re = await asyncOp();
+				done = true;
+			} catch (errorInfo) {
+				if (errorInfo.code === 'failed-save') {
+					retryCount--;
+					if (retryCount > 0) {
+						await new Promise((resolve) => setTimeout(resolve, retryDelay));
+					} else {
+						done = true;
+					}
+				} else {
+					done = true;
+				}
+			}
+		} while (!done);
+
+		return re;
+	}
+
 	/** @private */
-	apiWrapper(isEdit, action, params, retrys=3) {
-		const retryDelay = 3000; // next try [ms]
+	apiWrapper(isEdit, action, params) {
 		return new Promise((resolve, reject) => {
 			let request;
 			if (!isEdit) {
@@ -356,15 +391,10 @@ class WikidataBot {
 						docref: re?.docref,
 					};
 					if (errorInfo.code === 'failed-save') {
-						if (retrys>0) {
-							console.log('Failed save. Re-try in a bit...');
-							setTimeout(() => {
-								this.apiWrapper(isEdit, action, params, retrys-1);
-							}, retryDelay);
-							return;
-						}
+						console.warn(logTag, `Failed to save (${action}). Should retry in less then a minute.`);
+					} else {
+						console.error(logTag, `Request failed (${action}).`, errorInfo);
 					}
-					console.error(logTag, `Request failed (${action}).`, errorInfo);
 					// console.error(logTag, JSON.stringify(errorInfo, null, '\t'));
 					reject(errorInfo);
 				})
