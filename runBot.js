@@ -72,7 +72,7 @@ await removeById();
 //
 // Remove coords.
 /**/
-const qList = await utils.readQidsFile('./temp.2023-09-15--inspired2.tsv');
+const qList = await utils.readQidsFile('./temp.2023-09-15--inspired4.tsv');
 console.log(qList.length, qList);
 let propertyId = 'P625';
 
