@@ -1,8 +1,9 @@
 {
-	"name": "wiki-wd-mass-modyfication",
-	"version": "0.0.1",
-	"description": "Masowe modyfikacje Wikidanych, w szczególności lokalizacji (współrzędności geograficzne).",
+	"name": "wdbot",
+	"version": "0.1.0",
+	"description": "Mass modifications of Wikidata, especially for removing values e.g. locations (geographic coordinates).",
 	"type": "module",
+	"main": "src/main.js",
 	"scripts": {
 		"test": "mocha"
 	},

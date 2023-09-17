@@ -2,7 +2,7 @@
 import { mwn } from "mwn";
 import { formatTime } from './utils.js';
 
-const logTag = '[MassWdOps]';
+const logTag = '[wdBot]';
 
 /**
  * Wikidata entity operations.
