@@ -1,5 +1,8 @@
 {
 	"recommendations": [
-		"bierner.comment-tagged-templates"
+		"bierner.comment-tagged-templates",
+		"hbenl.vscode-mocha-test-adapter",
+		"hbenl.vscode-test-explorer",
+		"dbaeumer.vscode-eslint"
 	]
 }
