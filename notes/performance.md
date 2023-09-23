@@ -3,6 +3,12 @@
 Scenario base:
 Standard account, use mwn, get entinty and remove a single value.
 
+Take aways:
+- Running read operation in paralel works (is not blocked) and is fast.
+- Running write operation like removal is limited to 90 requests per minute (see edit ops in [mw:API ratelimiting](https://www.mediawiki.org/wiki/API:Ratelimit)).
+- Running write ops in paralel will not help as you will run into the mentioned limit anyway.
+- SPARQL is faster then "wbgetentities" (tested in different repo). If you can get what you need via SPARQL, you probably should.
+
 ## One-by-one
 
 Running on by one is rather slow: about 600ms per record.
