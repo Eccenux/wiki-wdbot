@@ -21,6 +21,6 @@
 		"mocha": "10.x"
 	},
 	"dependencies": {
-		"mwn": "^1.11.5"
+		"mwn": "3.x"
 	}
 }
