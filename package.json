@@ -1,6 +1,6 @@
 {
 	"name": "wdbot",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Mass modifications of Wikidata, especially for removing values e.g. locations (geographic coordinates).",
 	"type": "module",
 	"main": "src/main.js",
